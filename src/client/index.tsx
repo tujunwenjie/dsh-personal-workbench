@@ -21,7 +21,7 @@ import {
 } from './taskFilterSort.js'
 import { isWslStylePath, joinPath, normalizeWindowsPathToWsl } from './workspacePath.js'
 import { WORKBENCH_CSS } from './styles.js'
-import { ACTIVATE_EVENT, ACTIVE_ATTR, ENTRY_ATTR, PANEL_NAME, PENDING_ATTR, SIBLING_ATTRS, VIEW_ATTR } from './constants.js'
+import { ACTIVATE_EVENT, ACTIVE_ATTR, ENTRY_ATTR, ENTRY_LABEL, ENTRY_PART, ENTRY_PLUGIN, FAMILY_ENTRY_SELECTOR, PANEL_NAME, PENDING_ATTR, SIBLING_ATTRS, SIDEBAR_CONTEXT_SELECTOR, VIEW_ATTR } from './constants.js'
 import { Modal } from './components/Modal.js'
 import { SettingsModal } from './components/SettingsModal.js'
 import { DraftBanner } from './components/DraftBanner.js'
@@ -2485,7 +2485,13 @@ export function apply(ctx: unknown): () => void {
   const entry = document.createElement('button')
   entry.type = 'button'
   entry.setAttribute(ENTRY_ATTR, '')
-  entry.innerHTML = '<svg aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M2 6.5h12M5.5 2v3M10.5 2v3"/><path d="M5 9.5l1.5 1.5L9.5 8"/></svg><span class="wb-label">工作台</span>'
+  // 家族语义属性 + 可读名称：皮肤中心按 [data-dsh-part="sidebar-entry"] 统一描边侧栏入口行，
+  // 兄弟插件与无障碍工具也按这两个属性识别这一行（原先只设了 ENTRY_ATTR，外面认不出来）。
+  entry.setAttribute('data-dsh-plugin', ENTRY_PLUGIN)
+  entry.setAttribute('data-dsh-part', ENTRY_PART)
+  entry.setAttribute('aria-label', ENTRY_LABEL)
+  entry.title = ENTRY_LABEL
+  entry.innerHTML = `<svg aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M2 6.5h12M5.5 2v3M10.5 2v3"/><path d="M5 9.5l1.5 1.5L9.5 8"/></svg><span class="wb-label">${ENTRY_LABEL}</span>`
   entry.addEventListener('click', () => { setOpen(!open) })
   const syncEntry = (): void => { if (open) entry.dataset.active = 'true'; else delete entry.dataset.active }
   const entryObserver = new MutationObserver(syncEntry)
@@ -2510,7 +2516,7 @@ export function apply(ctx: unknown): () => void {
     if (entry.parentElement !== rootEl) {
       const row = button.closest('[class*="logoRow"]')
       const base = row !== null && row.parentElement === rootEl ? row : button
-      const family = Array.from(rootEl.children).filter((el): el is HTMLElement => el instanceof HTMLElement && el.matches('[data-dsh-taskboard-entry], [data-dsh-ssh-entry]'))
+      const family = Array.from(rootEl.children).filter((el): el is HTMLElement => el instanceof HTMLElement && el.matches(FAMILY_ENTRY_SELECTOR))
       const anchor = family.length > 0 ? family[0] : base.nextElementSibling
       rootEl.insertBefore(entry, anchor)
     }
@@ -2526,7 +2532,7 @@ export function apply(ctx: unknown): () => void {
     if (!open) return
     const target = event.target as HTMLElement | null
     if (target === null) return
-    if (target.closest('[class*="sessionRow"], [class*="projectRow"], [class*="searchResultRow"], [class*="searchResultWorkspace"], [class*="newSession"]') !== null) setOpen(false)
+    if (target.closest(SIDEBAR_CONTEXT_SELECTOR) !== null) setOpen(false)
   }
   document.addEventListener(ACTIVATE_EVENT, onOtherActivate)
   document.addEventListener('click', onClickSidebarRow, true)

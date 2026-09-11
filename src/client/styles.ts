@@ -3,7 +3,14 @@
  * 颜色一律走 DSH 宿主令牌 --dsw-alias-*，不引入自有配色，保证与外壳一致。
  * 结构：宿主注入钩子 → 布局 → 组件 → 弹窗/toast → 响应式。
  */
-import { ACTIVE_ATTR, ENTRY_ATTR, PENDING_ATTR, VIEW_ATTR } from './constants.js'
+import { ACTIVE_ATTR, ENTRY_ATTR, PENDING_ATTR, SIBLING_ATTRS, VIEW_ATTR } from './constants.js'
+
+/**
+ * 兄弟面板 active 属性的排除门控（`:not(...)` 串）。
+ * 由 SIBLING_ATTRS 派生，避免 JS 里的互斥清单与 CSS 里的显示门控各写一份、慢慢漂移
+ * ——dsh-mnemon 一度就被漏在 CSS 门控之外，两个面板会同时可见。
+ */
+const SIBLING_GATES = SIBLING_ATTRS.map((attr) => `:not([${attr}])`).join('')
 
 export const WORKBENCH_CSS = `[data-pane='conversation'], [class*='centerCol'] { position: relative; }
 [${VIEW_ATTR}] {
@@ -11,16 +18,16 @@ export const WORKBENCH_CSS = `[data-pane='conversation'], [class*='centerCol'] {
   background: var(--dsw-alias-bg-base, #111); color: var(--dsw-alias-label-primary, #eee);
   font-family: var(--dsw-font-family, system-ui); overflow: hidden;
 }
-html[${ACTIVE_ATTR}]:not([data-dsh-taskboard-active]):not([data-dsh-ssh-active]) [${VIEW_ATTR}] { display: block; }
-html[${ACTIVE_ATTR}]:not([data-dsh-taskboard-active]):not([data-dsh-ssh-active]) [data-pane='conversation'] > :not([${VIEW_ATTR}]),
-html[${ACTIVE_ATTR}]:not([data-dsh-taskboard-active]):not([data-dsh-ssh-active]) [class*='centerCol'] > :not([${VIEW_ATTR}]) { display: none !important; }
-[${ENTRY_ATTR}] { position:relative; display:flex; align-items:center; gap:8px; width:100%; height:32px; padding:0 12px; background:transparent; border:none; border-radius:8px; color:var(--dsw-alias-label-secondary); cursor:pointer; font-size:13px; white-space:nowrap; text-align:left; }
+html[${ACTIVE_ATTR}]${SIBLING_GATES} [${VIEW_ATTR}] { display: block; }
+html[${ACTIVE_ATTR}]${SIBLING_GATES} [data-pane='conversation'] > :not([${VIEW_ATTR}]),
+html[${ACTIVE_ATTR}]${SIBLING_GATES} [class*='centerCol'] > :not([${VIEW_ATTR}]) { display: none !important; }
+[${ENTRY_ATTR}] { box-sizing:border-box; position:relative; display:flex; align-items:center; gap:10px; width:100%; min-height:36px; padding:0 10px; background:transparent; border:none; border-radius:8px; color:var(--dsw-alias-label-secondary); cursor:pointer; font-size:13px; white-space:nowrap; text-align:left; }
 [${ENTRY_ATTR}] svg { width:16px; height:16px; flex:none; }
 [${ENTRY_ATTR}]:hover { background: var(--dsw-specific-sidebar-nav-item-hover); color: var(--dsw-alias-label-primary); }
 [${ENTRY_ATTR}][data-active] { background: var(--dsw-specific-sidebar-nav-item-active); color: var(--dsw-alias-label-primary); font-weight:600; }
 html[${PENDING_ATTR}] [${ENTRY_ATTR}]::after { content:''; position:absolute; top:6px; right:10px; width:7px; height:7px; border-radius:50%; background:#e74c3c; }
-[data-dsh-frame][data-sidebar-collapsed] [${ENTRY_ATTR}] { justify-content:center; padding:0; width:100%; }
-[data-dsh-frame][data-sidebar-collapsed] [${ENTRY_ATTR}] .wb-label { display:none; }
+[data-sidebar-collapsed] [${ENTRY_ATTR}] { border-radius:50%; justify-content:center; width:36px; min-height:36px; margin:0 auto 12px; padding:0; }
+[data-sidebar-collapsed] [${ENTRY_ATTR}] .wb-label { display:none; }
 .wb-app { height:100%; display:flex; flex-direction:column; }
 .wb-h { flex:none; display:flex; align-items:center; gap:12px; padding:14px 18px; border-bottom:1px solid var(--dsw-alias-border-l1, rgba(127,127,127,.22)); background:var(--dsw-alias-bg-layer-1, rgba(255,255,255,.02)); }
 .wb-title { display:flex; align-items:center; gap:8px; font-size:16px; font-weight:700; letter-spacing:.02em; white-space:nowrap; }
