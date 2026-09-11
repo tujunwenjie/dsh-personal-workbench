@@ -3,14 +3,7 @@
  * 颜色一律走 DSH 宿主令牌 --dsw-alias-*，不引入自有配色，保证与外壳一致。
  * 结构：宿主注入钩子 → 布局 → 组件 → 弹窗/toast → 响应式。
  */
-import { ACTIVE_ATTR, ENTRY_CLASS, ENTRY_ICON_CLASS, ENTRY_LABEL_CLASS, PENDING_ATTR, SIBLING_ATTRS, VIEW_ATTR } from './constants.js'
-
-/**
- * 兄弟面板 active 属性的排除门控（`:not(...)` 串）。
- * 由 SIBLING_ATTRS 派生，避免 JS 里的互斥清单与 CSS 里的显示门控各写一份、慢慢漂移
- * ——dsh-mnemon 一度就被漏在 CSS 门控之外，两个面板会同时可见。
- */
-const SIBLING_GATES = SIBLING_ATTRS.map((attr) => `:not([${attr}])`).join('')
+import { ACTIVE_ATTR, ENTRY_CLASS, ENTRY_ICON_CLASS, ENTRY_LABEL_CLASS, PENDING_ATTR, VIEW_ATTR } from './constants.js'
 
 export const WORKBENCH_CSS = `[data-pane='conversation'], [class*='centerCol'] { position: relative; }
 [${VIEW_ATTR}] {
@@ -18,9 +11,9 @@ export const WORKBENCH_CSS = `[data-pane='conversation'], [class*='centerCol'] {
   background: var(--dsw-alias-bg-base, #111); color: var(--dsw-alias-label-primary, #eee);
   font-family: var(--dsw-font-family, system-ui); overflow: hidden;
 }
-html[${ACTIVE_ATTR}]${SIBLING_GATES} [${VIEW_ATTR}] { display: block; }
-html[${ACTIVE_ATTR}]${SIBLING_GATES} [data-pane='conversation'] > :not([${VIEW_ATTR}]),
-html[${ACTIVE_ATTR}]${SIBLING_GATES} [class*='centerCol'] > :not([${VIEW_ATTR}]) { display: none !important; }
+html[${ACTIVE_ATTR}] [${VIEW_ATTR}] { display: block; }
+html[${ACTIVE_ATTR}] [data-pane='conversation'] > :not([${VIEW_ATTR}]),
+html[${ACTIVE_ATTR}] [class*='centerCol'] > :not([${VIEW_ATTR}]) { display: none !important; }
 .${ENTRY_CLASS} { box-sizing:border-box; position:relative; display:flex; align-items:center; gap:10px; width:100%; min-height:36px; padding:0 10px; background:0 0; border:none; border-radius:8px; color:var(--dsw-alias-label-secondary); cursor:pointer; font-size:13px; white-space:nowrap; text-align:left; }
 .${ENTRY_CLASS}:hover { background:var(--dsw-specific-sidebar-nav-item-hover, var(--dsw-alias-interactive-bg-hover)); color:var(--dsw-alias-label-primary); }
 .${ENTRY_CLASS}[data-active] { background:var(--dsw-specific-sidebar-nav-item-active, var(--dsw-alias-interactive-bg-active)); color:var(--dsw-alias-label-primary); font-weight:600; }

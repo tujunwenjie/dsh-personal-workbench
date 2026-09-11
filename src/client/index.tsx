@@ -21,7 +21,7 @@ import {
 } from './taskFilterSort.js'
 import { isWslStylePath, joinPath, normalizeWindowsPathToWsl } from './workspacePath.js'
 import { WORKBENCH_CSS } from './styles.js'
-import { ACTIVATE_EVENT, ACTIVE_ATTR, ENTRY_ATTR, ENTRY_CLASS, ENTRY_ICON_CLASS, ENTRY_LABEL, ENTRY_LABEL_CLASS, ENTRY_PART, ENTRY_PLUGIN, FAMILY_ENTRY_SELECTOR, PANEL_NAME, PENDING_ATTR, SIBLING_ATTRS, SIDEBAR_CONTEXT_SELECTOR, VIEW_ATTR } from './constants.js'
+import { ACTIVATE_EVENT, ACTIVE_ATTR, ENTRY_ATTR, ENTRY_CLASS, ENTRY_ICON_CLASS, ENTRY_LABEL, ENTRY_LABEL_CLASS, ENTRY_PART, ENTRY_PLUGIN, PANEL_NAME, PENDING_ATTR, VIEW_ATTR } from './constants.js'
 import { Modal } from './components/Modal.js'
 import { SettingsModal } from './components/SettingsModal.js'
 import { DraftBanner } from './components/DraftBanner.js'
@@ -2448,7 +2448,6 @@ export function apply(ctx: unknown): () => void {
   const setOpen = (value: boolean): void => {
     open = value
     if (open) {
-      for (const attr of SIBLING_ATTRS) document.documentElement.removeAttribute(attr)
       document.documentElement.setAttribute(ACTIVE_ATTR, '')
       document.dispatchEvent(new CustomEvent(ACTIVATE_EVENT, { detail: PANEL_NAME }))
     } else document.documentElement.removeAttribute(ACTIVE_ATTR)
@@ -2523,11 +2522,11 @@ export function apply(ctx: unknown): () => void {
     const button = newSessionButton(rootEl)
     if (button === undefined) return
     if (entry.parentElement !== rootEl) {
+      // 固定锚点：紧跟 New Session 行插入。不参考别的插件的入口行，位置就不会
+      // 随别人的自愈顺序漂移，也不需要维护一份兄弟插件选择器清单。
       const row = button.closest('[class*="logoRow"]')
       const base = row !== null && row.parentElement === rootEl ? row : button
-      const family = Array.from(rootEl.children).filter((el): el is HTMLElement => el instanceof HTMLElement && el.matches(FAMILY_ENTRY_SELECTOR))
-      const anchor = family.length > 0 ? family[0] : base.nextElementSibling
-      rootEl.insertBefore(entry, anchor)
+      rootEl.insertBefore(entry, base.nextElementSibling)
     }
     placed = true
   }
@@ -2536,20 +2535,14 @@ export function apply(ctx: unknown): () => void {
   watcher.observe(document.body, { childList: true, subtree: true })
   placeEntry(); placeView()
 
+  // 唯一的跨插件联动：别人开面板会广播自己的名字，听到不是自己的就收起工作台。
+  // 不带插件名清单，也不去动别人的状态。
   const onOtherActivate = (event: Event): void => { if ((event as CustomEvent).detail !== PANEL_NAME && open) setOpen(false) }
-  const onClickSidebarRow = (event: MouseEvent): void => {
-    if (!open) return
-    const target = event.target as HTMLElement | null
-    if (target === null) return
-    if (target.closest(SIDEBAR_CONTEXT_SELECTOR) !== null) setOpen(false)
-  }
   document.addEventListener(ACTIVATE_EVENT, onOtherActivate)
-  document.addEventListener('click', onClickSidebarRow, true)
 
   return () => {
     watcher.disconnect(); entryObserver.disconnect()
     document.removeEventListener(ACTIVATE_EVENT, onOtherActivate)
-    document.removeEventListener('click', onClickSidebarRow, true)
     entry.remove(); root.unmount(); view.remove()
     document.documentElement.removeAttribute(ACTIVE_ATTR)
     if (pluginCtx === ctx) pluginCtx = undefined
