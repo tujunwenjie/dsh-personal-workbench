@@ -33,6 +33,19 @@ export const ENTRY_PART = 'sidebar-entry'
 export const ENTRY_LABEL = '工作台'
 
 /**
+ * 入口行的类名。
+ *
+ * 家族里 task-board / ssh / mnemon 的入口行都由 CSS Module 生成
+ * `<前缀>_entry / _entryIcon / _entryLabel` 三个类（`_7D6uKa_entry`、`mL8Uca_entry`、
+ * `NS3bAW_entry`），行结构是「按钮 + 图标槽 + 文案槽」。本插件样式是手写全局 CSS、
+ * 没有 CSS Module 前缀，这里用同一套三段式命名补齐，保证侧栏里这一行的 DOM 结构、
+ * 图标槽宽度（24px）与文字起点和兄弟入口一致。
+ */
+export const ENTRY_CLASS = 'dshWorkbench_entry'
+export const ENTRY_ICON_CLASS = 'dshWorkbench_entryIcon'
+export const ENTRY_LABEL_CLASS = 'dshWorkbench_entryLabel'
+
+/**
  * 家族入口行选择器：用来把本插件入口插到同一区块里，并在重渲染后仍保持相对顺序。
  * 必须包含兄弟插件的行属性，否则只看得到自己，位置会在各插件自愈时漂移。
  */

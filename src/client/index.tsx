@@ -21,7 +21,7 @@ import {
 } from './taskFilterSort.js'
 import { isWslStylePath, joinPath, normalizeWindowsPathToWsl } from './workspacePath.js'
 import { WORKBENCH_CSS } from './styles.js'
-import { ACTIVATE_EVENT, ACTIVE_ATTR, ENTRY_ATTR, ENTRY_LABEL, ENTRY_PART, ENTRY_PLUGIN, FAMILY_ENTRY_SELECTOR, PANEL_NAME, PENDING_ATTR, SIBLING_ATTRS, SIDEBAR_CONTEXT_SELECTOR, VIEW_ATTR } from './constants.js'
+import { ACTIVATE_EVENT, ACTIVE_ATTR, ENTRY_ATTR, ENTRY_CLASS, ENTRY_ICON_CLASS, ENTRY_LABEL, ENTRY_LABEL_CLASS, ENTRY_PART, ENTRY_PLUGIN, FAMILY_ENTRY_SELECTOR, PANEL_NAME, PENDING_ATTR, SIBLING_ATTRS, SIDEBAR_CONTEXT_SELECTOR, VIEW_ATTR } from './constants.js'
 import { Modal } from './components/Modal.js'
 import { SettingsModal } from './components/SettingsModal.js'
 import { DraftBanner } from './components/DraftBanner.js'
@@ -2491,7 +2491,16 @@ export function apply(ctx: unknown): () => void {
   entry.setAttribute('data-dsh-part', ENTRY_PART)
   entry.setAttribute('aria-label', ENTRY_LABEL)
   entry.title = ENTRY_LABEL
-  entry.innerHTML = `<svg aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M2 6.5h12M5.5 2v3M10.5 2v3"/><path d="M5 9.5l1.5 1.5L9.5 8"/></svg><span class="wb-label">${ENTRY_LABEL}</span>`
+  // 行结构对齐家族：`..._entry` 按钮 + `..._entryIcon` 图标槽 + `..._entryLabel` 文案槽。
+  // 图标槽固定 24px（和 task-board / ssh / mnemon 的入口一样），文字起点才不会左右错位。
+  entry.className = ENTRY_CLASS
+  const entryIcon = document.createElement('span')
+  entryIcon.className = ENTRY_ICON_CLASS
+  entryIcon.innerHTML = '<svg aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M2 6.5h12M5.5 2v3M10.5 2v3"/><path d="M5 9.5l1.5 1.5L9.5 8"/></svg>'
+  const entryLabel = document.createElement('span')
+  entryLabel.className = ENTRY_LABEL_CLASS
+  entryLabel.textContent = ENTRY_LABEL
+  entry.append(entryIcon, entryLabel)
   entry.addEventListener('click', () => { setOpen(!open) })
   const syncEntry = (): void => { if (open) entry.dataset.active = 'true'; else delete entry.dataset.active }
   const entryObserver = new MutationObserver(syncEntry)

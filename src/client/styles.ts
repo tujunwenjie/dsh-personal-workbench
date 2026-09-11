@@ -3,7 +3,7 @@
  * 颜色一律走 DSH 宿主令牌 --dsw-alias-*，不引入自有配色，保证与外壳一致。
  * 结构：宿主注入钩子 → 布局 → 组件 → 弹窗/toast → 响应式。
  */
-import { ACTIVE_ATTR, ENTRY_ATTR, PENDING_ATTR, SIBLING_ATTRS, VIEW_ATTR } from './constants.js'
+import { ACTIVE_ATTR, ENTRY_CLASS, ENTRY_ICON_CLASS, ENTRY_LABEL_CLASS, PENDING_ATTR, SIBLING_ATTRS, VIEW_ATTR } from './constants.js'
 
 /**
  * 兄弟面板 active 属性的排除门控（`:not(...)` 串）。
@@ -21,13 +21,16 @@ export const WORKBENCH_CSS = `[data-pane='conversation'], [class*='centerCol'] {
 html[${ACTIVE_ATTR}]${SIBLING_GATES} [${VIEW_ATTR}] { display: block; }
 html[${ACTIVE_ATTR}]${SIBLING_GATES} [data-pane='conversation'] > :not([${VIEW_ATTR}]),
 html[${ACTIVE_ATTR}]${SIBLING_GATES} [class*='centerCol'] > :not([${VIEW_ATTR}]) { display: none !important; }
-[${ENTRY_ATTR}] { box-sizing:border-box; position:relative; display:flex; align-items:center; gap:10px; width:100%; min-height:36px; padding:0 10px; background:transparent; border:none; border-radius:8px; color:var(--dsw-alias-label-secondary); cursor:pointer; font-size:13px; white-space:nowrap; text-align:left; }
-[${ENTRY_ATTR}] svg { width:16px; height:16px; flex:none; }
-[${ENTRY_ATTR}]:hover { background: var(--dsw-specific-sidebar-nav-item-hover); color: var(--dsw-alias-label-primary); }
-[${ENTRY_ATTR}][data-active] { background: var(--dsw-specific-sidebar-nav-item-active); color: var(--dsw-alias-label-primary); font-weight:600; }
-html[${PENDING_ATTR}] [${ENTRY_ATTR}]::after { content:''; position:absolute; top:6px; right:10px; width:7px; height:7px; border-radius:50%; background:#e74c3c; }
-[data-sidebar-collapsed] [${ENTRY_ATTR}] { border-radius:50%; justify-content:center; width:36px; min-height:36px; margin:0 auto 12px; padding:0; }
-[data-sidebar-collapsed] [${ENTRY_ATTR}] .wb-label { display:none; }
+.${ENTRY_CLASS} { box-sizing:border-box; position:relative; display:flex; align-items:center; gap:10px; width:100%; min-height:36px; padding:0 10px; background:0 0; border:none; border-radius:8px; color:var(--dsw-alias-label-secondary); cursor:pointer; font-size:13px; white-space:nowrap; text-align:left; }
+.${ENTRY_CLASS}:hover { background:var(--dsw-specific-sidebar-nav-item-hover, var(--dsw-alias-interactive-bg-hover)); color:var(--dsw-alias-label-primary); }
+.${ENTRY_CLASS}[data-active] { background:var(--dsw-specific-sidebar-nav-item-active, var(--dsw-alias-interactive-bg-active)); color:var(--dsw-alias-label-primary); font-weight:600; }
+.${ENTRY_ICON_CLASS} { flex:none; display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; }
+.${ENTRY_ICON_CLASS} svg { width:18px; height:18px; display:block; }
+.${ENTRY_LABEL_CLASS} { overflow:hidden; text-overflow:ellipsis; }
+html[${PENDING_ATTR}] .${ENTRY_CLASS}::after { content:''; position:absolute; top:6px; right:10px; width:7px; height:7px; border-radius:50%; background:#e74c3c; }
+[data-sidebar-collapsed] .${ENTRY_CLASS} { color:var(--dsw-alias-label-primary); border-radius:50%; justify-content:center; width:36px; min-height:36px; margin:0 auto 12px; padding:0; }
+[data-sidebar-collapsed] .${ENTRY_ICON_CLASS} svg { width:20px; height:20px; }
+[data-sidebar-collapsed] .${ENTRY_LABEL_CLASS} { display:none; }
 .wb-app { height:100%; display:flex; flex-direction:column; }
 .wb-h { flex:none; display:flex; align-items:center; gap:12px; padding:14px 18px; border-bottom:1px solid var(--dsw-alias-border-l1, rgba(127,127,127,.22)); background:var(--dsw-alias-bg-layer-1, rgba(255,255,255,.02)); }
 .wb-title { display:flex; align-items:center; gap:8px; font-size:16px; font-weight:700; letter-spacing:.02em; white-space:nowrap; }
